@@ -250,7 +250,7 @@ function normalizeName(n){ return (n||'').trim().replace(/\s+/g,' '); }
 function nameKey(n){ return normalizeName(n).replace(/[.#$[\]]/g,'').replace(/\s+/g,'_').toLowerCase(); }
 function nowMs(){ return Date.now(); }
 
-const ADMIN_CODE = "خالد محمد رجب محمد محمد الكوراني";
+
 
 const state = {
   participantId: localStorage.getItem('participantId') || null,
@@ -692,4 +692,5 @@ async function computeAllExpiredWinners(){
 </script>
 </body>
 </html>
+
 
