@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>منصة الهدي - مسابقات دينية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#041018; --panel:rgba(255,255,255,0.02); --green:#0ea44a; --gold:#caa83a; --muted:#9fb0b3;
+  --btn-h:56px; --btn-radius:12px; --card-radius:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Cairo',sans-serif;background:
+  radial-gradient(900px 200px at 10% 0%, rgba(10,120,60,0.06), transparent 10%),
+  linear-gradient(180deg,#021017,#041018); color:#eaf6f0; -webkit-font-smoothing:antialiased}
+.container{max-width:1040px;margin:22px auto;padding:18px}
+.header{
+  display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:linear-gradient(90deg, rgba(202,168,58,0.03), transparent);
+  box-shadow:0 8px 20px rgba(2,6,10,0.6);
+}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:900;color:#08120c}
+.title{font-weight:800;font-size:18px}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--panel);padding:16px;border-radius:var(--card-radius);margin-bottom:14px}
+.small{font-size:13px;color:var(--muted)}
+.hidden{display:none}
+
+/* Buttons - stacked */
+.stack {display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn{
+  width:320px; max-width:88%; height:var(--btn-h); border-radius:var(--btn-radius); border:0; cursor:pointer; font-weight:800; font-size:16px;
+  display:inline-flex;align-items:center;justify-content:center; box-shadow: 0 8px 18px rgba(2,6,10,0.45);
+}
+.btn-main{background:linear-gradient(90deg,var(--green),#5fd07a); color:#042016}
+.btn-alt{background:linear-gradient(90deg,var(--gold),#f6da7a); color:#2b1700}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04); color:var(--muted)}
+.note{margin-top:10px;text-align:center;color:var(--muted)}
+
+input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#eaf6f0;margin-top:8px}
+.list-item{padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);margin-bottom:10px;border:1px solid rgba(255,255,255,0.02)}
+.option{display:block;padding:12px;border-radius:10px;margin-top:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;text-align:right}
+.option.selected{outline:2px solid rgba(14,164,74,0.18);background:linear-gradient(90deg, rgba(14,164,74,0.02), rgba(202,168,58,0.02))}
+.error{color:#ff8b8b}
+.footer{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
+
+.grid-2{display:grid;grid-template-columns:1fr 360px;gap:16px}
+@media (max-width:980px){ .grid-2{grid-template-columns:1fr} }
+@media (max-width:520px){ .btn{width:92%} .logo{width:48px;height:48px} }
+
+.q-builder-row{border:1px dashed rgba(255,255,255,0.03);padding:10px;border-radius:10px;margin-top:8px}
+.q-row{display:flex;gap:8px;align-items:center}
+.q-row input[type="text"]{flex:1}
+.q-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+
+/* simple leaderboard styling */
+.leader {padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header card">
+    <div class="brand">
+      
+      <div>
+        <div class="title">منصة الهدي مسابقات دينية</div>
+       
+      </div>
+    </div>
+    <div>
+      <!-- space for future top user / status -->
+      <div id="topStatus" class="small" style="text-align:right"></div>
+    </div>
+  </header>
+
+  <!-- START -->
+  <section id="startSection" class="card">
+    <h2 style="margin:0">أهلاً بك</h2>
+    <p class="small">اختر طريقة الدخول</p>
+    <div class="stack" style="margin-top:18px">
+      <button id="playerBtn" class="btn btn-main">دخول المتسابق</button>
+      <button id="adminBtn" class="btn btn-main">دخول المسؤول</button>
+    </div>
+   
+  </section>
+
+  <!-- PLAYER LOGIN (now with password) -->
+  <section id="playerLogin" class="card hidden" style="max-width:640px;margin:14px auto">
+    <h3 style="margin:0 0 8px 0">دخول المتسابق / تسجيل جديد</h3>
+    <label class="small">الاسم الرباعي</label>
+    <input id="playerName" placeholder="الإسم رباعي" autocomplete="off"/>
+    <label class="small">كلمة المرور</label>
+    <input id="playerPass" type="password" placeholder="كلمة السر" autocomplete="new-password"/>
+    <div id="playerMsg" class="small error" style="min-height:18px;margin-top:6px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button id="playerCancel" class="btn btn-ghost" style="height:44px;width:auto">الغاء</button>
+      <button id="playerSubmit" class="btn btn-main" style="height:44px;width:auto">تسجيل دخول</button>
+    </div>
+   
+  </section>
+
+  <!-- PLAYER HOME -->
+  <section id="playerHome" class="card hidden">
+  
+      <div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+        <div id="welcomeName" style="font-weight:800;font-size:18px"></div>
+        <div id="memberSince" class="small"></div>
+      </div>
+<br>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="showQuizzes" class="btn btn-ghost" style="height:44px">المسابقات</button>
+        <button id="showWinners" class="btn btn-ghost" style="height:44px">قائمة المتسابقين</button>
+        <button id="playerLogout" class="btn btn-ghost" style="height:44px">الخروج</button>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid-2">
+      <div class="card" id="playerContentCard">
+        <div id="playerContentArea" class="small">جارٍ التحميل...</div>
+      </div>
+
+      
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quizPanel" class="card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div id="quizTitle" style="font-weight:800"></div>
+      <div><button id="quitQuizBtn" class="btn btn-ghost" style="height:44px">خروج</button></div>
+    </div>
+
+    <div id="quizCard" style="margin-top:12px">
+      <h3 id="questionText">—</h3>
+      <div id="optionsArea"></div>
+
+      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+        <div style="width:50%"><div style="height:10px;background:rgba(255,255,255,0.02);border-radius:10px;overflow:hidden"><i id="progressBar" style="display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold));width:0%"></i></div></div>
+        <div style="display:flex;gap:8px">
+          <button id="prevQBtn" class="btn btn-ghost" style="height:44px">السابق</button>
+          <button id="nextQBtn" class="btn btn-main" style="height:44px">التالي</button>
+        </div>
+      </div>
+
+      <div id="quizMsg" class="small error" style="margin-top:10px"></div>
+    </div>
+
+    <div id="quizResultArea" style="margin-top:12px"></div>
+  </section>
+
+  <!-- ADMIN LOGIN -->
+  <section id="adminLogin" class="card hidden" style="max-width:640px;margin:16px auto">
+    <h3 style="margin:0 0 8px 0">دخول المسؤول</h3>
+    <label class="small">كود المسؤول</label>
+    <input id="adminCodeInput" placeholder="كود المسؤول" autocomplete="off"/>
+    <div id="adminLoginMsg" class="small error" style="min-height:18px;margin-top:6px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button id="adminCancelBtn" class="btn btn-ghost" style="height:44px">الغاء</button>
+      <button id="adminLoginBtn" class="btn btn-alt" style="height:44px">دخول</button>
+    </div>
+  </section>
+
+  <!-- ADMIN PANEL -->
+  <section id="adminPanel" class="card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:800">لوحة المسؤول</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="computeWinnersBtn" class="btn btn-main" style="height:44px">احسب الفائزين الآن</button>
+        <button id="adminLogoutBtn" class="btn btn-ghost" style="height:44px">تسجيل الخروج</button>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="openCreateQuiz" class="btn btn-main" style="height:44px">إضافة مسابقة جديدة</button>
+      <button id="refreshQuizzesBtn" class="btn btn-ghost" style="height:44px">تحديث المسابقات</button>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid-2" style="gap:16px">
+      <div class="card">
+        <h4>المسابقات</h4>
+        <div id="adminQuizzesList">جارٍ التحميل...</div>
+      </div>
+
+      <div class="card" id="createQuizCard">
+        <h4 id="createQuizTitle">إنشاء مسابقة جديدة</h4>
+        <div id="createQuizArea">
+          <label class="small">اسم المسابقة</label>
+          <input id="newQuizTitle" placeholder="عنوان المسابقة"/>
+          <label class="small">تاريخ ووقت بداية المسابقة (اختياري)</label>
+          <input id="newQuizStart" type="datetime-local"/>
+          <label class="small">تاريخ ووقت نهاية المسابقة (اختياري — إن لم تُحدد ستكون النهاية بعد ساعتين من البداية)</label>
+          <input id="newQuizEnd" type="datetime-local"/>
+          <div style="height:10px"></div>
+          <h5>الأسئلة (4 اختيارات)</h5>
+          <div id="questionsBuilder"></div>
+          <div class="q-actions">
+            <button id="addQuestionBuilder" class="btn btn-ghost" style="height:40px">أضف سؤال</button>
+            <button id="saveQuizBtn" class="btn btn-main" style="height:40px">حفظ المسابقة</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="small" style="color:var(--muted)">حدد البداية أو النهاية أو كلاهما. إن اخترت البداية فقط ستكون مدة المسابقة ساعتين.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card">
+      <h4 id="adminSelectedQuizTitle">تفاصيل المسابقة المحددة</h4>
+      <div id="adminQuestionsArea">—</div>
+      <div style="height:8px"></div>
+      <h5>قائمة المتسابقين (مرتبة حسب النقاط — الأعلى أولاً)</h5>
+      <div id="adminWinnersArea">—</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ JavaScript ============ -->
+<script type="module">
+/* ========== Firebase (Realtime DB) ========== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, push, set, get, onValue, remove, runTransaction } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCLPRNaPb1DjbCPJSFb6KxoIkLUMDwMzHQ",
+  authDomain: "elhodacom-cfb82.firebaseapp.com",
+  databaseURL: "https://elhodacom-cfb82-default-rtdb.firebaseio.com/",
+  projectId: "elhodacom-cfb82",
+  storageBucket: "elhodacom-cfb82.appspot.com",
+  messagingSenderId: "415308923581",
+  appId: "1:415308923581:web:938cd43054d653154cadd4",
+  measurementId: "G-BJGTB1RF44"
+};
+
+let db=null, firebaseInitialized=false;
+function initFirebase(cfg){
+  try{
+    initializeApp(cfg);
+    db = getDatabase();
+    firebaseInitialized = true;
+    return true;
+  }catch(e){ console.error(e); firebaseInitialized=false; return false; }
+}
+initFirebase(firebaseConfig);
+
+/* ========== helpers & state ========= */
+const $ = id => document.getElementById(id);
+function normalizeName(n){ return (n||'').trim().replace(/\s+/g,' '); }
+function nameKey(n){ return normalizeName(n).replace(/[.#$[\]]/g,'').replace(/\s+/g,'_').toLowerCase(); }
+function nowMs(){ return Date.now(); }
+
+const ADMIN_CODE = "خالد محمد رجب محمد محمد الكوراني";
+
+const state = {
+  participantId: localStorage.getItem('participantId') || null,
+  participantName: localStorage.getItem('participantName') || null,
+  isAdmin: localStorage.getItem('isAdmin') === 'true',
+  currentQuizId: null,
+  quizQuestions: [],
+  currentIndex: 0,
+  currentScore: 0
+};
+
+/* ========== UI navigation (all buttons active) ========== */
+function hideAllSections(){
+  ['startSection','playerLogin','playerHome','quizPanel','adminLogin','adminPanel'].forEach(id=>{ const el=$(id); if(el) el.classList.add('hidden'); });
+}
+function showSection(id){
+  hideAllSections(); const el=$(id); if(el) el.classList.remove('hidden');
+  if(state.participantName && $('welcomeName')) $('welcomeName').textContent = state.participantName;
+  // update top status
+  $('topStatus').textContent = state.isAdmin ? 'متصل كمسؤول' : (state.participantName ? `مسجل: ${state.participantName}` : '');
+}
+
+/* ========== bind events ========= */
+window.addEventListener('DOMContentLoaded', ()=>{
+  // main
+  $('playerBtn').addEventListener('click', ()=> { if(state.participantId && !state.isAdmin){ showSection('playerHome'); renderPlayerHome(); } else showSection('playerLogin'); });
+  $('adminBtn').addEventListener('click', ()=> showSection('adminLogin'));
+
+  // player login
+  $('playerCancel').addEventListener('click', ()=> showSection('startSection'));
+  $('playerSubmit').addEventListener('click', playerLogin);
+  $('playerName').addEventListener('keyup', e=> { if(e.key==='Enter') $('playerPass').focus(); });
+  $('playerPass').addEventListener('keyup', e=> { if(e.key==='Enter') playerLogin(); });
+
+  // player home
+  $('playerLogout').addEventListener('click', ()=> { localStorage.removeItem('participantId'); localStorage.removeItem('participantName'); state.participantId=null; state.participantName=null; showSection('startSection'); });
+  $('showQuizzes').addEventListener('click', renderQuizzesForPlayer);
+  $('showWinners').addEventListener('click', renderWinnersForPlayer);
+
+  // quiz controls
+  $('nextQBtn').addEventListener('click', nextQuestion);
+  $('prevQBtn').addEventListener('click', prevQuestion);
+  $('quitQuizBtn').addEventListener('click', ()=> { showSection('playerHome'); renderPlayerHome(); });
+
+  // admin login
+  $('adminCancelBtn').addEventListener('click', ()=> showSection('startSection'));
+  $('adminLoginBtn').addEventListener('click', adminLogin);
+  $('adminCodeInput').addEventListener('keyup', e=> { if(e.key==='Enter') adminLogin(); });
+
+  // admin panel
+  $('adminLogoutBtn').addEventListener('click', ()=> { localStorage.removeItem('isAdmin'); state.isAdmin=false; showSection('startSection'); });
+  $('openCreateQuiz').addEventListener('click', ()=> { $('newQuizTitle').value=''; $('newQuizStart').value=''; $('newQuizEnd').value=''; $('questionsBuilder').innerHTML=''; showSection('adminPanel'); });
+  $('refreshQuizzesBtn').addEventListener('click', fetchQuizzesForAdmin);
+  $('addQuestionBuilder').addEventListener('click', addQuestionBuilderRow);
+  $('saveQuizBtn').addEventListener('click', saveQuizFromBuilder);
+  $('computeWinnersBtn').addEventListener('click', async ()=> { await computeAllExpiredWinners(); alert('اكتمل حساب الفائزين'); });
+
+  // initial routing
+  if(state.isAdmin){ showSection('adminPanel'); fetchQuizzesForAdmin(); }
+  else if(state.participantId){ showSection('playerHome'); renderPlayerHome(); }
+  else showSection('startSection');
+});
+
+/* ========== PLAYER: register/login with password ========= */
+async function playerLogin(){
+  $('playerMsg').textContent = '';
+  if(!firebaseInitialized){ $('playerMsg').textContent = 'Firebase غير مهيأ.'; return; }
+  const raw = $('playerName').value || '';
+  const pass = $('playerPass').value || '';
+  const name = normalizeName(raw);
+  if(!name){ $('playerMsg').textContent = 'اكتب الاسم الرباعي'; return; }
+  const parts = name.split(' ');
+  if(parts.length !== 4){ $('playerMsg').textContent = 'الاسم لازم يكون رباعي (4 كلمات)'; return; }
+  if(!pass){ $('playerMsg').textContent = 'ادخل كلمة السر'; return; }
+
+  const key = nameKey(name);
+  try{
+    const unameRef = ref(db, `usernames/${key}`);
+    const snap = await get(unameRef);
+    if(snap.exists()){
+      // user exists -> verify password
+      const uid = snap.val();
+      const userSnap = await get(ref(db, `users/${uid}`));
+      if(userSnap.exists()){
+        const u = userSnap.val();
+        // NOTE: password stored as base64 (not secure) for simplicity; compare accordingly
+        const stored = u.password || '';
+        if(stored === btoa(pass)){
+          // correct password -> login
+          state.participantId = uid; state.participantName = u.name;
+          localStorage.setItem('participantId', uid); localStorage.setItem('participantName', u.name);
+          $('playerName').value=''; $('playerPass').value='';
+          showSection('playerHome'); renderPlayerHome();
+          return;
+        } else {
+          $('playerMsg').textContent = 'كلمة السر خاطئة';
+          return;
+        }
+      } else {
+        // inconsistent mapping - remove and continue to register
+        await remove(unameRef);
+      }
+    }
+
+    // not exists -> register new user (claim key atomically)
+    const newUserRef = push(ref(db, 'users'));
+    const newUserId = newUserRef.key;
+    const tx = await runTransaction(unameRef, (current) => {
+      if(current === null) return newUserId;
+      return; // abort
+    }, {applyLocally:false});
+    if(!tx.committed){ $('playerMsg').textContent='الاسم اتسجل دلوقتي — جرب اسم تاني'; return; }
+
+    const userObj = { name, password: btoa(pass), createdAt: Date.now(), currentContest:null, currentProgress:null, scores:{} };
+    await set(ref(db, `users/${newUserId}`), userObj);
+    await set(ref(db, `usernames/${key}`), newUserId);
+
+    state.participantId = newUserId; state.participantName = name;
+    localStorage.setItem('participantId', newUserId); localStorage.setItem('participantName', name);
+    $('playerName').value=''; $('playerPass').value='';
+    showSection('playerHome'); renderPlayerHome();
+  }catch(e){
+    console.error('playerLogin error', e);
+    $('playerMsg').textContent = 'حصل خطأ أثناء العملية';
+  }
+}
+
+/* ========== PLAYER HOME / QUIZZES / SCOREBOARD ========= */
+async function renderPlayerHome(){
+  $('welcomeName').textContent = state.participantName || '';
+  if(!firebaseInitialized){ $('playerContentArea').textContent = 'Firebase غير مهيأ'; return; }
+  try{
+    const s = await get(ref(db, `users/${state.participantId}`));
+    if(s.exists()){
+      const u = s.val();
+      $('memberSince').textContent = `مسجل منذ ${new Date(u.createdAt).toLocaleDateString('ar-EG')}`;
+      // load scores
+      const scores = u.scores || {};
+      const scoreEls = Object.keys(scores).length ? Object.keys(scores).map(k=> `${k}: ${scores[k].score}` ).join('<br>') : 'لا توجد نتائج بعد';
+      $('playerScores').innerHTML = scoreEls;
+      if(u.currentContest){
+        const area = $('playerContentArea');
+        const resumeBtn = document.createElement('button'); resumeBtn.className='btn btn-main'; resumeBtn.textContent='استئناف المسابقة الحالية';
+        resumeBtn.addEventListener('click', ()=> startQuiz(u.currentContest));
+        area.prepend(resumeBtn);
+      }
+    }
+    renderQuizzesForPlayer();
+  }catch(e){ console.error(e); $('playerContentArea').textContent='حصل خطأ'; }
+}
+
+function renderQuizzesForPlayer(){
+  if(!firebaseInitialized){ $('playerContentArea').textContent='Firebase غير مهيأ'; return; }
+  $('playerContentArea').innerHTML = '<div class="small">تحميل المسابقات...</div>';
+  onValue(ref(db, 'quizzes'), (snap)=>{
+    const container = $('playerContentArea'); container.innerHTML = '';
+    if(!snap.exists()){ container.innerHTML = '<div class="small">لا توجد مسابقات حالياً</div>'; return; }
+    snap.forEach(child=>{
+      const q = child.val(); const id = child.key;
+      const now = nowMs();
+      const start = q.startTime || 0;
+      const end = q.endTime || 0;
+      let status = '';
+      if(start && now < start) status = `<span style="color:var(--muted);font-size:12px"> (ستفتح ${new Date(start).toLocaleString('ar-EG')})</span>`;
+      else if(end && now > end) status = `<span style="color:var(--muted);font-size:12px"> (انتهت)</span>`;
+      const div = document.createElement('div'); div.className='list-item';
+      div.innerHTML = `<div style="font-weight:700">${q.title} ${status}</div><div class="small">${q.description||''}</div>
+        <div style="margin-top:8px;display:flex;justify-content:flex-end"><button class="btn btn-main startQuizBtn" data-id="${id}">ابدأ المسابقة</button></div>`;
+      container.appendChild(div);
+    });
+    container.querySelectorAll('.startQuizBtn').forEach(b=> b.addEventListener('click', ()=> startQuiz(b.dataset.id)));
+  }, {onlyOnce:false});
+}
+
+async function renderWinnersForPlayer(){
+  if(!firebaseInitialized){ $('playerContentArea').textContent='Firebase غير مهيأ'; return; }
+  $('playerContentArea').innerHTML = '<div class="small">تحميل قائمة المتسابقين...</div>';
+  try{
+    // We'll show live results per quiz (not only final winners)
+    const quizzesSnap = await get(ref(db, 'quizzes'));
+    const container = $('playerContentArea'); container.innerHTML = '';
+    if(!quizzesSnap.exists()){ container.innerHTML = '<div class="small">لا توجد مسابقات</div>'; return; }
+    const quizzes = quizzesSnap.val();
+    for(const qid of Object.keys(quizzes)){
+      const q = quizzes[qid];
+      const header = document.createElement('div'); header.innerHTML = `<h4 style="margin:0 0 8px 0">${q.title}</h4>`;
+      container.appendChild(header);
+      const resSnap = await get(ref(db, `results/${qid}`));
+      const arr = resSnap.exists() ? Object.values(resSnap.val()) : [];
+      arr.sort((a,b)=> { if(b.score!==a.score) return b.score-a.score; return (a.time||0)-(b.time||0); });
+      if(!arr.length){ container.appendChild(document.createElement('div')).innerHTML = '<div class="small">لا توجد نتائج</div>'; container.appendChild(document.createElement('hr')); continue; }
+      const ol = document.createElement('ol');
+      arr.forEach(it=> { const li = document.createElement('li'); li.textContent = `${it.name} — ${it.score} نقطة`; ol.appendChild(li); });
+      container.appendChild(ol); container.appendChild(document.createElement('hr'));
+    }
+  }catch(e){ console.error('renderWinnersForPlayer', e); $('playerContentArea').textContent='حصل خطأ'; }
+}
+
+/* ========== QUIZ flow ========= */
+async function startQuiz(quizId){
+  if(!state.participantId){ showSection('playerLogin'); return; }
+  if(!firebaseInitialized){ alert('Firebase غير مهيأ'); return; }
+  const s = await get(ref(db, `quizzes/${quizId}`));
+  if(!s.exists()){ alert('المسابقة غير موجودة'); return; }
+  const quiz = s.val();
+  const now = nowMs();
+  const start = quiz.startTime || 0;
+  const end = quiz.endTime || 0;
+  // check availability: must be within start..end (if set)
+  if(start && now < start){ alert('المسابقة لم تبدأ بعد'); return; }
+  if(end && now > end){ alert('المسابقة انتهت'); return; }
+  state.currentQuizId = quizId;
+  state.quizQuestions = Object.keys(quiz.questions || {}).map(k=> ({ id:k, ...quiz.questions[k] }));
+  // prevent multiple attempts
+  const resSnap = await get(ref(db, `results/${quizId}/${state.participantId}`));
+  if(resSnap.exists()){ alert('أنت حللت هذه المسابقة بالفعل — لا يمكن الحل مرة أخرى.'); return; }
+  // new progress
+  state.currentIndex = 0; state.currentScore = 0;
+  await set(ref(db, `users/${state.participantId}/currentContest`), quizId);
+  await set(ref(db, `users/${state.participantId}/currentProgress`), { quizId, index:0, score:0, answers:{} });
+  $('quizTitle').textContent = quiz.title;
+  showSection('quizPanel'); renderQuestion();
+}
+
+function renderQuestion(){
+  const arr = state.quizQuestions;
+  if(!arr.length){ $('questionText').textContent='لا توجد أسئلة'; $('optionsArea').innerHTML=''; return; }
+  const cur = arr[state.currentIndex];
+  $('questionText').textContent = `${state.currentIndex+1}. ${cur.text}`;
+  $('optionsArea').innerHTML = '';
+  ['a','b','c','d'].forEach(opt=>{
+    if(cur[opt]){
+      const el = document.createElement('div'); el.className='option'; el.textContent = cur[opt]; el.dataset.opt = opt;
+      el.addEventListener('click', ()=> { Array.from($('optionsArea').children).forEach(ch=>ch.classList.remove('selected')); el.classList.add('selected'); });
+      $('optionsArea').appendChild(el);
+    }
+  });
+  const pct = Math.round(((state.currentIndex+1)/arr.length)*100);
+  $('progressBar').style.width = pct + '%';
+  $('quizMsg').textContent = '';
+}
+
+async function nextQuestion(){
+  const sel = Array.from($('optionsArea').children).find(ch=>ch.classList.contains('selected'));
+  if(!sel){ $('quizMsg').textContent = 'اختار إجابة قبل المتابعة'; return; }
+  const currentQ = state.quizQuestions[state.currentIndex];
+  const selectedOpt = sel.dataset.opt;
+  if(selectedOpt === currentQ.correct) state.currentScore += 1;
+  // save progress
+  const progSnap = await get(ref(db, `users/${state.participantId}/currentProgress`));
+  const answers = progSnap.exists() ? (progSnap.val().answers || {}) : {};
+  answers[currentQ.id] = selectedOpt;
+  await set(ref(db, `users/${state.participantId}/currentProgress`), { quizId: state.currentQuizId, index: state.currentIndex + 1, score: state.currentScore, answers });
+  if(state.currentIndex + 1 < state.quizQuestions.length){ state.currentIndex++; renderQuestion(); }
+  else await finishQuiz();
+}
+
+async function prevQuestion(){
+  if(state.currentIndex === 0) return;
+  state.currentIndex--;
+  await set(ref(db, `users/${state.participantId}/currentProgress/index`), state.currentIndex);
+  renderQuestion();
+}
+
+async function finishQuiz(){
+  const result = { name: state.participantName, participantId: state.participantId, score: state.currentScore, time: Date.now(), submittedAt: Date.now() };
+  await set(ref(db, `results/${state.currentQuizId}/${state.participantId}`), result);
+  await set(ref(db, `users/${state.participantId}/scores/${state.currentQuizId}`), { score: state.currentScore, submittedAt: Date.now() });
+  await set(ref(db, `users/${state.participantId}/currentContest`), null);
+  await set(ref(db, `users/${state.participantId}/currentProgress`), null);
+  $('quizResultArea').innerHTML = `<div class="card"><h3>انتهت المسابقة</h3><p>النقاط: ${state.currentScore} / ${state.quizQuestions.length}</p>
+    <p style="margin-top:8px"><button id="toHomeAfterQuizBtn" class="btn btn-main" style="height:44px">العودة للصفحة الرئيسية</button></p></div>`;
+  $('nextQBtn').disabled = true; $('prevQBtn').disabled = true;
+  document.getElementById('toHomeAfterQuizBtn')?.addEventListener('click', ()=> { showSection('playerHome'); renderPlayerHome(); });
+}
+
+/* ========== ADMIN logic ========= */
+function adminLogin(){
+  $('adminLoginMsg').textContent = '';
+  const code = ($('adminCodeInput').value || '').trim();
+  if(code === ADMIN_CODE){
+    state.isAdmin = true; localStorage.setItem('isAdmin','true');
+    showSection('adminPanel'); fetchQuizzesForAdmin();
+  } else { $('adminLoginMsg').textContent = 'كود خاطئ'; }
+}
+
+function addQuestionBuilderRow(){
+  const container = $('questionsBuilder');
+  const name = 'qb_' + Date.now();
+  const div = document.createElement('div'); div.className='q-builder-row'; div.dataset.name = name;
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700">سؤال جديد</div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost removeQRow" style="height:34px">حذف</button></div>
+    </div>
+    <input class="q-text" placeholder="نص السؤال"/>
+    <div class="q-row"><input class="q-a" placeholder="الخيار a"/><label style="margin-right:8px"><input type="radio" name="${name}" value="a"/> صح</label></div>
+    <div class="q-row"><input class="q-b" placeholder="الخيار b"/><label style="margin-right:8px"><input type="radio" name="${name}" value="b"/> صح</label></div>
+    <div class="q-row"><input class="q-c" placeholder="الخيار c"/><label style="margin-right:8px"><input type="radio" name="${name}" value="c"/> صح</label></div>
+    <div class="q-row"><input class="q-d" placeholder="الخيار d"/><label style="margin-right:8px"><input type="radio" name="${name}" value="d"/> صح</label></div>
+  `;
+  container.appendChild(div);
+  div.querySelector('.removeQRow').addEventListener('click', ()=> div.remove());
+}
+
+async function saveQuizFromBuilder(){
+  const title = $('newQuizTitle').value.trim();
+  const startVal = $('newQuizStart').value;
+  const endVal = $('newQuizEnd').value;
+  if(!title){ alert('اكتب عنوان المسابقة'); return; }
+  const rows = Array.from(document.querySelectorAll('.q-builder-row'));
+  if(rows.length === 0){ alert('أضف سؤالاً واحداً على الأقل'); return; }
+  const questionsObj = {};
+  for(const r of rows){
+    const text = r.querySelector('.q-text').value.trim();
+    const a = r.querySelector('.q-a').value.trim();
+    const b = r.querySelector('.q-b').value.trim();
+    const c = r.querySelector('.q-c').value.trim();
+    const d = r.querySelector('.q-d').value.trim();
+    const correct = r.querySelector(`input[name="${r.dataset.name}"]:checked`)?.value;
+    if(!text||!a||!b||!c||!d||!['a','b','c','d'].includes((correct||'').toLowerCase())){ alert('اكمل كل الحقول واختر الإجابة الصحيحة لكل سؤال'); return; }
+    const key = push(ref(db, 'quizzes_keys')).key;
+    questionsObj[key] = { text, a, b, c, d, correct: correct.toLowerCase() };
+    // remove temporary key node (we used it only to generate unique id)
+    remove(ref(db, 'quizzes_keys/'+key)).catch(()=>{});
+  }
+  let startMs = startVal ? new Date(startVal).getTime() : 0;
+  let endMs = endVal ? new Date(endVal).getTime() : 0;
+  if(startMs && !endMs) endMs = startMs + 2*60*60*1000; // 2 hours default
+  if(!startMs && !endMs){
+    // no times set, default: start now, end in 2 hours
+    startMs = nowMs();
+    endMs = startMs + 2*60*60*1000;
+  }
+  try{
+    const qRef = push(ref(db, 'quizzes'));
+    const qid = qRef.key;
+    await set(ref(db, `quizzes/${qid}`), { title, description:'', createdAt: Date.now(), startTime: startMs, endTime: endMs, questions: questionsObj });
+    $('newQuizTitle').value=''; $('newQuizStart').value=''; $('newQuizEnd').value=''; $('questionsBuilder').innerHTML='';
+    alert('تم حفظ المسابقة');
+    fetchQuizzesForAdmin();
+  }catch(e){ console.error(e); alert('خطأ أثناء الحفظ'); }
+}
+
+async function fetchQuizzesForAdmin(){
+  $('adminQuizzesList').innerHTML = 'تحميل...';
+  try{
+    const snap = await get(ref(db, 'quizzes'));
+    const container = $('adminQuizzesList'); container.innerHTML = '';
+    if(!snap.exists()){ container.innerHTML = '<div class="small">لا توجد مسابقات</div>'; return; }
+    const obj = snap.val();
+    for(const id of Object.keys(obj)){
+      const q = obj[id];
+      const startStr = q.startTime ? ` — تبدأ: ${new Date(q.startTime).toLocaleString('ar-EG')}` : '';
+      const endStr = q.endTime ? ` — تنتهي: ${new Date(q.endTime).toLocaleString('ar-EG')}` : '';
+      const el = document.createElement('div'); el.className='list-item';
+      el.innerHTML = `<div style="font-weight:700">${q.title}${startStr}${endStr}</div><div class="small">${q.description||''}</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-ghost selectQuizBtn" data-id="${id}">تحكم</button>
+          <button class="btn btn-ghost deleteQuizBtn" data-id="${id}">حذف</button>
+        </div>`;
+      container.appendChild(el);
+    }
+    container.querySelectorAll('.selectQuizBtn').forEach(b=> b.addEventListener('click', ()=> selectQuizForAdmin(b.dataset.id)));
+    container.querySelectorAll('.deleteQuizBtn').forEach(b=> b.addEventListener('click', async ()=>{
+      const qid = b.dataset.id; if(!confirm('حذف المسابقة وكل نتائجها؟')) return;
+      try{ await remove(ref(db, `quizzes/${qid}`)); await remove(ref(db, `results/${qid}`)); await remove(ref(db, `winners/${qid}`)); alert('تم الحذف'); fetchQuizzesForAdmin(); $('adminSelectedQuizTitle').textContent='لم يتم تحديد مسابقة'; $('adminQuestionsArea').innerHTML=''; $('adminWinnersArea').innerHTML=''; }catch(e){ console.error(e); alert('خطأ في الحذف'); }
+    }));
+  }catch(e){ console.error(e); $('adminQuizzesList').textContent='حصل خطأ'; }
+}
+
+async function selectQuizForAdmin(qid){
+  const s = await get(ref(db, `quizzes/${qid}`)); if(!s.exists()){ alert('المسابقة غير موجودة'); return; }
+  const q = s.val();
+  $('adminSelectedQuizTitle').textContent = q.title;
+  const qs = q.questions || {}; const area = $('adminQuestionsArea'); area.innerHTML = '';
+  for(const k of Object.keys(qs)){
+    const it = qs[k]; const d = document.createElement('div'); d.className='list-item';
+    d.innerHTML = `<div style="font-weight:700">${it.text}</div><div class="small">a:${it.a} | b:${it.b} | c:${it.c} | d:${it.d} | صح:${it.correct}</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-ghost editQ" data-qid="${qid}" data-key="${k}">تعديل</button>
+        <button class="btn btn-ghost delQ" data-qid="${qid}" data-key="${k}">حذف</button>
+      </div>`;
+    area.appendChild(d);
+  }
+  area.querySelectorAll('.delQ').forEach(b=> b.addEventListener('click', async ()=> { const qid = b.dataset.qid; const key = b.dataset.key; if(!confirm('حذف السؤال؟')) return; await remove(ref(db, `quizzes/${qid}/questions/${key}`)); selectQuizForAdmin(qid); }));
+  area.querySelectorAll('.editQ').forEach(b=> b.addEventListener('click', async ()=> {
+    const qid = b.dataset.qid; const key = b.dataset.key; const cur = (await get(ref(db, `quizzes/${qid}/questions/${key}`))).val();
+    const t = prompt('نص السؤال', cur.text); if(t===null) return; const a = prompt('a', cur.a); if(a===null) return; const bb = prompt('b', cur.b); if(bb===null) return; const c = prompt('c', cur.c); if(c===null) return; const d = prompt('d', cur.d); if(d===null) return; const corr = prompt('الإجابة الصحيحة (a/b/c/d)', cur.correct); if(!t||!a||!bb||!c||!d||!['a','b','c','d'].includes((corr||'').toLowerCase())) return alert('بيانات ناقصة'); await set(ref(db, `quizzes/${qid}/questions/${key}`), { text:t, a, b:bb, c, d, correct:corr.toLowerCase() }); selectQuizForAdmin(qid);
+  }));
+  renderLiveParticipants(qid);
+}
+
+async function renderLiveParticipants(qid){
+  // show current participants list from results (sorted) in admin panel
+  const snap = await get(ref(db, `results/${qid}`));
+  const area = $('adminWinnersArea'); area.innerHTML = '';
+  if(!snap.exists()){ area.innerHTML = '<div class="small">لا توجد مشاركات</div>'; return; }
+  const arr = Object.values(snap.val());
+  arr.sort((a,b)=> { if(b.score !== a.score) return b.score - a.score; return (a.time||0) - (b.time||0); });
+  arr.forEach((it, idx)=> {
+    const el = document.createElement('div'); el.className='leader';
+    el.innerHTML = `<div style="font-weight:700">${idx+1}. ${it.name}</div><div class="small">${it.score} نقطة</div>`;
+    area.appendChild(el);
+  });
+}
+
+/* ========== winners (compute after 24h) ========= */
+async function computeWinnersForQuiz(quizId){
+  const resSnap = await get(ref(db, `results/${quizId}`));
+  if(!resSnap.exists()) return;
+  const arr = Object.values(resSnap.val());
+  arr.sort((a,b)=> { if(b.score !== a.score) return b.score - a.score; return (a.time||0) - (b.time||0); });
+  const top10 = arr.slice(0,10);
+  const winnersObj = {};
+  for(let i=0;i<top10.length;i++){
+    const p = top10[i];
+    winnersObj[p.participantId || ('p'+i)] = { name: p.name, score: p.score, rank: i+1 };
+  }
+  await set(ref(db, `winners/${quizId}`), winnersObj);
+}
+
+async function computeAllExpiredWinners(){
+  const now = nowMs();
+  const snap = await get(ref(db, 'quizzes'));
+  if(!snap.exists()) return;
+  const quizzes = snap.val();
+  for(const qid of Object.keys(quizzes)){
+    const q = quizzes[qid];
+    const end = q.endTime || 0;
+    if(end > 0 && (now - end) >= 24*60*60*1000){
+      const wSnap = await get(ref(db, `winners/${qid}`));
+      if(!wSnap.exists()) await computeWinnersForQuiz(qid);
+    }
+  }
+}
+
+/* ========== end ========= */
+</script>
+</body>
+</html>
